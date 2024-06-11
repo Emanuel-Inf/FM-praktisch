@@ -4,28 +4,20 @@
 Date: 30.11.2022
 """
 
-
-import numpy as np
-import pandas as pd
-from deck import Deck
-
+import csv
 from typing import Any
 
-def read_xlsx(file_name: str) -> np.ndarray:
-    """Read the values from [file_name] and convert them into an array of lists.
+from deck import Deck
 
-    Args:
-        file_name: The file to be read.
 
-    Returns:
-        contents: The contents of the file as a two dimensional nparray.
-    """
-    excel_data = pd.read_excel(file_name)
-    data = pd.DataFrame(excel_data)
-    
-    return data.to_numpy()
+def read_csv(file_name: str) -> list[tuple[str, ...]]:
+    """Read all values from file_name."""
+    with open(file_name, "r", newline="", encoding="utf-8") as file_contents:
+        csv_reader = csv.reader(file_contents, delimiter=",")
+        return [tuple(item) for item in csv_reader]
 
-def _parse_data_to_list_with_deck_objects(data_vector: list[Any]) -> list[Deck]:
+
+def parse_data_to_list_with_deck_objects(data_vector: list[Any]) -> list[Deck]:
     """Get a list of data and parse it to a list with Decks.
 
     Args:
@@ -34,17 +26,18 @@ def _parse_data_to_list_with_deck_objects(data_vector: list[Any]) -> list[Deck]:
     Returns:
         list_of_decks: Representation of the dataset with Deck objects.
     """
-     
+
     list_of_decks: list[Deck] = []
 
     for inner_list in data_vector:
-        list_of_decks.append(_construct_deck_Object_from_dict(_parse_datalist_to_dict(inner_list)))
-    
+        list_of_decks.append(
+            construct_deck_object_from_dict(parse_datalist_to_dict(inner_list))
+        )
+
     return list_of_decks
 
 
-
-def _parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
+def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
     """Get a list of data and parse it to a dictionary.
 
     Args:
@@ -59,14 +52,15 @@ def _parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
     main_deck: list[Any] = data_vector[6]
 
     data_dict: dict[str, Any] = {
-            "deck_num": deck_num,
-            "name": name,
-            "main_deck": main_deck,
-        }
-    
+        "deck_num": deck_num,
+        "name": name,
+        "main_deck": main_deck,
+    }
+
     return data_dict
 
-def _construct_deck_Object_from_dict(deck_as_dict: dict[str, Any]) -> Deck:
+
+def construct_deck_object_from_dict(deck_as_dict: dict[str, Any]) -> Deck:
     """Create a deckobject from a given dictionary of data.
 
     Args:
@@ -80,3 +74,4 @@ def _construct_deck_Object_from_dict(deck_as_dict: dict[str, Any]) -> Deck:
         deck_as_dict["name"],
         deck_as_dict["main_deck"],
     )
+
