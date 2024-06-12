@@ -4,18 +4,33 @@
 Date: 30.11.2022
 """
 
+import functools
+import os
+
 import data_reader
+
+CSV_DIRECTORY: str = "./daten/csv/"
+SEARCHED_CARD: str = "83764718"
 
 
 def main():
     """Executes the main function."""
 
-    csv_data = data_reader.read_csv("daten/csv/00000001.csv")
+    files = os.listdir(CSV_DIRECTORY)  # Get all files in directory
+    decks = []
+    for f in files:
+        csv_data = data_reader.read_csv(f"{CSV_DIRECTORY}/{f}")
+        list_of_decks = data_reader.parse_data_to_list_with_deck_objects(csv_data)
+        print(f"Lade Datei mit {len(list_of_decks)} Decks")
+        decks.append(list_of_decks)
 
-    list_of_decks = data_reader.parse_data_to_list_with_deck_objects(csv_data)
+    flattened_decks = functools.reduce(lambda x, y: x + y, decks, [])
 
-    # # Beispiel um das letzte Deck innerhalb des Datensatzes zu bekommen
-    print(list_of_decks)
+    count = 0
+    for deck in flattened_decks:
+        count += deck.contains_card(SEARCHED_CARD)
+
+    print(f"The card {SEARCHED_CARD} was counted {count} times")
 
 
 if __name__ == "__main__":
