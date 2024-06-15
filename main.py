@@ -11,6 +11,7 @@ import data_reader
 
 CSV_DIRECTORY: str = "./daten/csv/"
 SEARCHED_CARD: str = "83764718"
+SEARCH_CARD_LIST = ["83764718", "47826112", "3643300", "53804307", "81843628", "36553319"]
 
 
 def main():
@@ -30,8 +31,15 @@ def main():
     for deck in flattened_decks:
         count += deck.contains_card(SEARCHED_CARD)
 
-    print(f"The card {SEARCHED_CARD} was counted {count} times")
+    #print(f"The card {SEARCHED_CARD} was counted {count} times")
+    dict_cards = {}
+    for card in SEARCH_CARD_LIST:
+        dict_cards[card] = 0
+        count = 0
+        for deck in flattened_decks:
+            count += deck.contains_card(card)
+        dict_cards[card] +=  count
 
-
+    print(dict_cards)
 if __name__ == "__main__":
     main()
