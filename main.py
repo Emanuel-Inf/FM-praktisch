@@ -7,7 +7,7 @@ Date: 30.11.2022
 import functools
 import os
 import random
-
+import ygoprodeckAPI
 import data_reader
 
 CSV_DIRECTORY: str = "./daten/csv/"
@@ -45,6 +45,7 @@ def main():
 
     # TODO: Calculate the confidence intervall
 
+    print(ygoprodeckAPI.getCardPriceSum(SEARCH_CARDS))
 
 if __name__ == "__main__":
     main()

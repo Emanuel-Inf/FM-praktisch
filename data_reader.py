@@ -7,7 +7,7 @@ Date: 30.11.2022
 import csv
 from typing import Any
 
-from deck import Deck
+from classes.deck import Deck
 
 
 def read_csv(file_name: str) -> list[tuple[str, ...]]:
