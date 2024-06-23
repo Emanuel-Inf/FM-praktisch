@@ -6,9 +6,9 @@ Date: 30.11.2022
 
 import csv
 from typing import Any
-
+import ast
 from classes.deck import Deck
-
+import json
 
 def read_csv(file_name: str) -> list[tuple[str, ...]]:
     """Read all values from file_name."""
@@ -48,12 +48,16 @@ def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
     """
     deck_num: str = str(data_vector[0])
     name: str = str(data_vector[2])
-    main_deck: list[Any] = data_vector[6]
+    main_deck_string = data_vector[6]
+    
+    deck_str = main_deck_string.strip('[]')
+    deck_liste = deck_str.split(',')  
+    deck_liste = [id.strip('"') for id in deck_liste]
 
     data_dict: dict[str, Any] = {
         "deck_num": deck_num,
         "name": name,
-        "main_deck": main_deck,
+        "main_deck": deck_liste,
     }
 
     return data_dict

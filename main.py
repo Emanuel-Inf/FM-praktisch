@@ -9,10 +9,12 @@ import os
 import random
 import ygoprodeckAPI
 import data_reader
+from classes.cardtype import CardType
+import logRegression
 
 CSV_DIRECTORY: str = "./daten/csv/"
 SEARCH_CARDS = ["83764719", "47826112", "3643300", "53804307", "81843628", "36553319"]
-SAMPLE_SIZE: int = 2000
+SAMPLE_SIZE: int = 30
 
 
 def main():
@@ -46,6 +48,10 @@ def main():
     # TODO: Calculate the confidence intervall
 
     #print(ygoprodeckAPI.getCardPriceSum(SEARCH_CARDS))
-    print(ygoprodeckAPI.getCardFromLocal("83764719"))
+    #card = ygoprodeckAPI.getCardFromLocal("3643300")
+    for deck in random_sample:
+        list_of_cards = logRegression.GetAllCardsInDeck(deck)
+        print(logRegression.getAnzahlKartenTypen(list_of_cards))
+    
 if __name__ == "__main__":
     main()
