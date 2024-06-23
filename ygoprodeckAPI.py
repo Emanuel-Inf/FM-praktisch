@@ -1,6 +1,8 @@
 import requests
 from classes.card import Card
+import json
 
+PATH_CARDS_JSON = "./daten/cards/allcards.json"
 
 def getCard(cardID: str) -> Card:
     api_url = "https://db.ygoprodeck.com/api/v7/cardinfo.php?id={0}".format(cardID)
@@ -25,3 +27,16 @@ def getCardPriceSum(cardIDs: list[str]) -> int:
     
     return sum_card_prices
     
+def getCardFromLocal(cardID: str) -> Card:
+    with open(PATH_CARDS_JSON, "r") as file:
+     localJson = json.load(file)
+    
+    karten_dict = {karte['id']: karte for karte in localJson['data']}
+    dict_card= karten_dict.get(int(cardID),None)
+
+    return Card(
+        name=dict_card["name"],
+        card_prices=dict_card["card_prices"]
+    )
+    
+

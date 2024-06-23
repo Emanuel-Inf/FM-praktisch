@@ -11,8 +11,8 @@ import ygoprodeckAPI
 import data_reader
 
 CSV_DIRECTORY: str = "./daten/csv/"
-SEARCH_CARDS = ["83764718", "47826112", "3643300", "53804307", "81843628", "36553319"]
-SAMPLE_SIZE: int = 0
+SEARCH_CARDS = ["83764719", "47826112", "3643300", "53804307", "81843628", "36553319"]
+SAMPLE_SIZE: int = 2000
 
 
 def main():
@@ -41,11 +41,11 @@ def main():
             count += deck.contains_card(card)
         card_frequency[card] += count
 
-    print(card_frequency)
+    #print(card_frequency)
 
     # TODO: Calculate the confidence intervall
 
-    print(ygoprodeckAPI.getCardPriceSum(SEARCH_CARDS))
-
+    #print(ygoprodeckAPI.getCardPriceSum(SEARCH_CARDS))
+    print(ygoprodeckAPI.getCardFromLocal("83764719"))
 if __name__ == "__main__":
     main()
