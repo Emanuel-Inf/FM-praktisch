@@ -28,10 +28,11 @@ def parse_data_to_list_with_deck_objects(data_vector: list[Any]) -> list[Deck]:
     """
 
     list_of_decks: list[Deck] = []
-
+    formatsFilter = ["Meta Decks", "World Championship Decks", "Tournament Meta Decks"]
     for inner_list in data_vector:
-        list_of_decks.append(
-            construct_deck_object_from_dict(parse_datalist_to_dict(inner_list))
+        if(filterDecks(inner_list, formatsFilter)):
+            list_of_decks.append(
+                construct_deck_object_from_dict(parse_datalist_to_dict(inner_list))
         )
 
     return list_of_decks
@@ -50,7 +51,8 @@ def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
     name: str = str(data_vector[2])
     format: str = str(data_vector[5])
     main_deck_string = data_vector[6]
-    
+    deck_format = data_vector[5]
+
     deck_str = main_deck_string.strip('[]')
     deck_liste = deck_str.split(',')  
     deck_liste = [id.strip('"') for id in deck_liste]
@@ -60,6 +62,7 @@ def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
         "name": name,
         "format": format,
         "main_deck": deck_liste,
+        "format": deck_format
     }
 
     return data_dict
@@ -79,4 +82,9 @@ def construct_deck_object_from_dict(deck_as_dict: dict[str, Any]) -> Deck:
         deck_as_dict["name"],
         deck_as_dict["format"],
         deck_as_dict["main_deck"],
+        deck_as_dict["format"]
     )
+
+def filterDecks(deck: list[Any], format: list[str]) -> int:
+     
+    return deck[5] in format
