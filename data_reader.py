@@ -48,6 +48,7 @@ def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
     """
     deck_num: str = str(data_vector[0])
     name: str = str(data_vector[2])
+    format: str = str(data_vector[5])
     main_deck_string = data_vector[6]
     
     deck_str = main_deck_string.strip('[]')
@@ -57,6 +58,7 @@ def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
     data_dict: dict[str, Any] = {
         "deck_num": deck_num,
         "name": name,
+        "format": format,
         "main_deck": deck_liste,
     }
 
@@ -75,5 +77,6 @@ def construct_deck_object_from_dict(deck_as_dict: dict[str, Any]) -> Deck:
     return Deck(
         deck_as_dict["deck_num"],
         deck_as_dict["name"],
+        deck_as_dict["format"],
         deck_as_dict["main_deck"],
     )

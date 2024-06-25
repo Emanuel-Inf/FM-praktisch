@@ -7,6 +7,7 @@ class Deck:
 
     deck_num: str
     name: str
+    format: str
     main_deck: list[str]
 
     def contains_card(self, card_id: str) -> int:
