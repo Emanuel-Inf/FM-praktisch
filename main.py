@@ -14,7 +14,7 @@ import logRegression
 
 CSV_DIRECTORY: str = "./daten/csv/"
 SEARCH_CARDS = ["83764719", "47826112", "3643300", "53804307", "81843628", "36553319"]
-SAMPLE_SIZE: int = 30
+SAMPLE_SIZE: int = 500
 
 
 def main():
@@ -49,9 +49,15 @@ def main():
 
     #print(ygoprodeckAPI.getCardPriceSum(SEARCH_CARDS))
     #card = ygoprodeckAPI.getCardFromLocal("3643300")
+    vorbereitete_daten = []
     for deck in random_sample:
-        list_of_cards = logRegression.GetAllCardsInDeck(deck)
-        print(logRegression.getAnzahlKartenTypen(list_of_cards))
-    
+        #list_of_cards = logRegression.GetAllCardsInDeck(deck)
+        #print(logRegression.getAnzahlKartenTypen(list_of_cards))
+        vorbereitete_daten.append(logRegression.getAnzahlKartenUndFormat(deck)) 
+
+    logRegression.logRegression(vorbereitete_daten)
+
 if __name__ == "__main__":
     main()
+
+
