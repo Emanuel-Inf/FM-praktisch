@@ -1,6 +1,6 @@
 from classes.deck import Deck
 from classes.card import Card
-from classes.cardtype import CardType
+from ENUMS.cardtype import CardType
 import ygoprodeckAPI
 
 import pandas as pd

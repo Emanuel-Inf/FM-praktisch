@@ -1,6 +1,7 @@
 import json
 from classes.card import Card
-from classes.cardtype import CardType
+from ENUMS.cardtype import CardType
+from classes.deck import Deck
 
 PATH_CARDS_JSON = "./daten/cards/allcards.json"
 cards_cache = {}
@@ -18,13 +19,6 @@ def getCardFromCache(cardID: str) -> Card:
         card_prices=card.get("card_prices", [{}]),
         card_type=checkTyping(card.get("type", ""))
     )
-
-def deckHasCompletePriceInfo(deck: list[str]) -> bool:
-    for card_id in deck:
-        card = getCardFromCache(card_id)
-        if not has_valid_price_info(card):
-            return False
-    return True
 
 def has_valid_price_info(card: Card) -> bool:
     try:

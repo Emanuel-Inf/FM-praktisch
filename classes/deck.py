@@ -7,7 +7,6 @@ class Deck:
 
     deck_num: str
     name: str
-    format: str
     main_deck: list[str]
     format: str
 

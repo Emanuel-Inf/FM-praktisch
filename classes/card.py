@@ -1,5 +1,5 @@
 import dataclasses
-from classes.cardtype import CardType
+from ENUMS.cardtype import CardType
 
 @dataclasses.dataclass
 class Card:
