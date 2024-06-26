@@ -9,10 +9,8 @@ class Deck:
     name: str
     format: str
     main_deck: list[str]
-    format: str
 
     def contains_card(self, card_id: str) -> int:
         """Search for a card in the deck."""
         counted_cards = self.main_deck.count(card_id)
         return counted_cards
-
