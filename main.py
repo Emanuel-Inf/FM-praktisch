@@ -43,9 +43,39 @@ def main():
 
     #Decks aus dem Datensatz lesen
     prepaired_decks = (data_reader.get_All_Decks_Prepaired())
+    data = {
+    'ArchetypeCount': [3, 1, 5, 2, 4, 2, 6, 3, 1, 5],  # Beispielwerte für die Anzahl der Archetyp-Karten in den Decks
+    'DeckType': [1, 1, 0, 0, 1, 0, 1, 0, 0, 0]  # 1 für competitive, 0 für casual
+    }
 
+    df = pd.DataFrame(data)
+
+    # Unabhängige Variable (Anzahl der Archetyp Karten) und abhängige Variable (Decktyp)
+    X = df['ArchetypeCount']
+    Y = df['DeckType']
+
+    # Hinzufügen einer Konstanten für die logistische Regression
+    X = sm.add_constant(X)
+
+    # Logistisches Regressionsmodell erstellen und anpassen
+    model = sm.Logit(Y, X)
+    results = model.fit()
+
+    # Ergebnisse der logistischen Regression anzeigen
+    print(results.summary())
+
+    # Wahrscheinlichkeiten plotten
+    plt.figure(figsize=(10, 6))
+    plt.scatter(df['ArchetypeCount'], df['DeckType'], c=df['DeckType'], cmap='coolwarm', label='Tatsächliche Werte', alpha=0.6)
+    plt.plot(df['ArchetypeCount'], results.predict(X), color='black', label='Vorhergesagte Wahrscheinlichkeiten')
+    plt.title('Logistische Regression: Vorhersage des Deck-Typs basierend auf Archetyp-Karten')
+    plt.xlabel('Anzahl der Archetyp-Karten im Deck')
+    plt.ylabel('Wahrscheinlichkeit für wettbewerbsfähiges Deck')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
     
-    
+    """""
     random_competitive_decks = logisticRegressionKarten.getRandomDecks(prepaired_decks, FormatType.COMPETITIVE, False, SAMPLE_SIZE)
     
     random_casual_decks = logisticRegressionKarten.getRandomDecks(prepaired_decks, FormatType.CASUAL, False, SAMPLE_SIZE)
@@ -88,7 +118,7 @@ def main():
     plt.title("Konfusionsmatrix für das logistische Regressionsmodell")
     plt.show()
     
-    """""
+
 #Tournament Decks correlate to a higer price
     prices_tournament = logisticRegressionTournamentDeckPreise.getPrices(logisticRegressionTournamentDeckPreise.getRandomDecks(prepaired_decks, FormatType.COMPETITIVE, False))
     prices_non_tournament = logisticRegressionTournamentDeckPreise.getPrices(logisticRegressionTournamentDeckPreise.getRandomDecks(prepaired_decks, FormatType.COMPETITIVE, True))
