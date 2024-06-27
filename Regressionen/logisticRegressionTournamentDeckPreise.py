@@ -9,50 +9,42 @@ from scipy.stats import shapiro, levene, mannwhitneyu, probplot
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from ENUMS.formatTypes import FormatType
 
-
-tournament_type = ["World Championship Decks", "Tournament Meta Decks", "Tournament Meta Decks OCG", "Meta Decks"]
 SAMPLE_SIZE: int = 250
 
-def getAllTournamentDecks(list_of_decks: list[Deck]) -> list[Deck]:
-    tournament_decks = [deck for deck in list_of_decks
-                        if deck.format in tournament_type]
-    return tournament_decks
+def getAllDecksBasedOnFormat(list_of_decks: list[Deck], formatType: FormatType, isNotFormat: bool) -> list[Deck]:
 
-def getAllNonTournamentDecks(list_of_decks: list[Deck]) -> list[Deck]:
-    non_tournament_decks = [deck for deck in list_of_decks
-                        if deck.format not in tournament_type]
-    return non_tournament_decks
+    decks_based_on_Format = []
+    if(isNotFormat):
+        decks_based_on_Format = [deck for deck in list_of_decks
+                            if deck.format not in formatType.value]
+    else:
+        decks_based_on_Format = [deck for deck in list_of_decks
+                            if deck.format in formatType.value]
+    return decks_based_on_Format
 
-def getRandomTournamentDecks(list_of_decks: list[Deck]) -> list[Deck]:
-     all_tournament_decks = getAllTournamentDecks(list_of_decks)
-     random_sample_tournament = random.sample(
-        all_tournament_decks, SAMPLE_SIZE if SAMPLE_SIZE > 0 else len(list_of_decks)
-    )
-     return random_sample_tournament
+def getRandomDecks(list_of_decks: list[Deck], formatType: FormatType, isNotFormat: bool) -> list[Deck]:
 
-def getRandomNonTournamentDecks(list_of_decks: list[Deck]) -> list[Deck]:
-     all_non_tournament_decks = getAllNonTournamentDecks(list_of_decks)
-     random_sample_non_tournament = random.sample(
-        all_non_tournament_decks, SAMPLE_SIZE if SAMPLE_SIZE > 0 else len(list_of_decks)
-    )
-     return random_sample_non_tournament
+    all_tournament_decks = getAllDecksBasedOnFormat(list_of_decks, formatType, isNotFormat)
+    randomDecks = random.sample(all_tournament_decks, SAMPLE_SIZE if SAMPLE_SIZE > 0 else len(list_of_decks))
+
+    return randomDecks
 
 def getPrices(sample_decks: list[Deck]) -> list[float]:
     prices_tournament = [ygoAPI.getCardPriceSum(deck.main_deck) for deck in sample_decks]
     return prices_tournament
 
-
-def regression(list_of_decks: list[Deck]):
-    tournament_decks = getRandomTournamentDecks(list_of_decks)
+def regression(prepaired_decks: list[Deck], formatType: FormatType):
+    tournament_decks = getRandomDecks(prepaired_decks, formatType , False)
     prices_tournament = getPrices(tournament_decks)
 
-    non_tournament_decks = getRandomNonTournamentDecks(list_of_decks)
+    non_tournament_decks = getRandomDecks(prepaired_decks, formatType, True)
     prices_non_tournament = getPrices(non_tournament_decks)
-
+    
     prices = np.concatenate([prices_tournament, prices_non_tournament])
     deck_type = np.array([1]*len(prices_tournament) + [0]*len(prices_non_tournament))
-
+    
     X = sm.add_constant(prices)
     Y = deck_type
 
