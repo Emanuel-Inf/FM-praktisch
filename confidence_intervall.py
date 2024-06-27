@@ -6,34 +6,14 @@ archetype is in a deck.
 @authors: Katin Kober, Emanuel Petrinovic, Max Weise
 """
 
-import functools
-import os
 import random
-from typing import Any
 
 import numpy as np
 
 import data_reader
 from classes.deck import Deck
 
-CSV_DIRECTORY: str = "./daten/csv/"
 SAMPLE_SIZE: int = 250
-
-
-def _get_decks_from_files(directory: str) -> list[Any]:
-    """Get decks from a filepath."""
-    files = os.listdir(directory)
-    decks = []
-    for f in files:
-        csv_data = data_reader.read_csv(f"{directory}/{f}")
-        list_of_decks = data_reader.parse_data_to_list_with_deck_objects(csv_data)
-        decks.append(list_of_decks)
-
-    # Prepare the data
-    flattened_decks = functools.reduce(lambda x, y: x + y, decks, [])
-    flattened_decks = flattened_decks[1:]
-
-    return flattened_decks
 
 
 def _archetype_is_present(
@@ -157,7 +137,7 @@ def main():
     }
 
     # === Get Data ===
-    decks = _get_decks_from_files(CSV_DIRECTORY)
+    decks = data_reader.get_All_Decks_Prepaired()
     random_sample = random.sample(decks, SAMPLE_SIZE if SAMPLE_SIZE > 0 else len(decks))
 
     # Calculate confidence intervalls
