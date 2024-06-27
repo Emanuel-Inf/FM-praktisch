@@ -2,7 +2,7 @@ import requests
 from classes.card import Card
 from classes.deck import Deck
 import json
-from classes.cardtype import CardType
+from ENUMS.cardtype import CardType
 from jsonpath_ng import jsonpath, parse
 
 PATH_CARDS_JSON = "./daten/cards/allcards.json"

@@ -4,13 +4,32 @@
 Date: 30.11.2022
 """
 
-import ast
 import csv
-import json
+import functools
+import os
 from typing import Any
 
 from classes.deck import Deck
 
+CSV_DIRECTORY: str = "./daten/csv/"
+
+def get_All_Decks_Prepaired() -> list[Deck]:
+
+    # Read all data from the data directory
+    files = os.listdir(CSV_DIRECTORY)
+
+    decks = []
+    for f in files:
+        csv_data = read_csv(f"{CSV_DIRECTORY}/{f}")
+        list_of_decks = parse_data_to_list_with_deck_objects(csv_data)
+        decks.append(list_of_decks)
+
+    # Prepare the data
+    flattened_decks = functools.reduce(lambda x, y: x + y, decks, [])
+    flattened_decks = flattened_decks[1:] #Deck(deck_num='deck_num', name='deck_name', main_deck=['main_deck'])
+    print(type(flattened_decks))
+
+    return flattened_decks
 
 def read_csv(file_name: str) -> list[tuple[str, ...]]:
     """Read all values from file_name."""
@@ -30,12 +49,10 @@ def parse_data_to_list_with_deck_objects(data_vector: list[Any]) -> list[Deck]:
     """
 
     list_of_decks: list[Deck] = []
-    formatsFilter = ["Meta Decks", "World Championship Decks", "Tournament Meta Decks"]
     for inner_list in data_vector:
-        if filterDecks(inner_list, formatsFilter):
-            list_of_decks.append(
-                construct_deck_object_from_dict(parse_datalist_to_dict(inner_list))
-            )
+        list_of_decks.append(
+            construct_deck_object_from_dict(parse_datalist_to_dict(inner_list))
+        )
 
     return list_of_decks
 
@@ -55,8 +72,8 @@ def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
     main_deck_string = data_vector[6]
     deck_format = data_vector[5]
 
-    deck_str = main_deck_string.strip("[]")
-    deck_liste = deck_str.split(",")
+    deck_str = main_deck_string.strip('[]')
+    deck_liste = deck_str.split(',')  
     deck_liste = [id.strip('"') for id in deck_liste]
 
     data_dict: dict[str, Any] = {
@@ -64,7 +81,7 @@ def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
         "name": name,
         "format": format,
         "main_deck": deck_liste,
-        "format": deck_format,
+        "format": deck_format
     }
 
     return data_dict
@@ -80,14 +97,12 @@ def construct_deck_object_from_dict(deck_as_dict: dict[str, Any]) -> Deck:
         deck: The Deckobject.
     """
     return Deck(
-        deck_as_dict["deck_num"],
-        deck_as_dict["name"],
-        deck_as_dict["format"],
-        deck_as_dict["main_deck"],
+        deck_num=deck_as_dict["deck_num"],
+        name=deck_as_dict["name"],
+        format=deck_as_dict["format"],
+        main_deck=deck_as_dict["main_deck"]
     )
 
-
 def filterDecks(deck: list[Any], format: list[str]) -> int:
-
+     
     return deck[5] in format
-
