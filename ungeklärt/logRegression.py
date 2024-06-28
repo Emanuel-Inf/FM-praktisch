@@ -1,7 +1,7 @@
 from classes.deck import Deck
 from classes.card import Card
 from ENUMS.cardtype import CardType
-import ygoprodeckAPI
+import ungeklärt.ygoprodeckAPI as ygoprodeckAPIprodeckAPI 
 
 import pandas as pd
 from sklearn.model_selection import train_test_split

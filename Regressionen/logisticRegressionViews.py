@@ -1,5 +1,5 @@
 from classes.deck import Deck
-import API2.cardAPIDatensatz2 as cardAPIDatensatz2
+import API.cardAPIDatensatz2 as cardAPIDatensatz2
 
 import numpy as np
 import random
@@ -10,7 +10,33 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from ENUMS.formatTypes import FormatType
-SAMPLE_SIZE: int = 250
+import data_reader
+
+def startLogRegressionForViews():
+    sample_size = 250
+    first_format = FormatType.ANIME
+    second_format = FormatType.CASUAL
+
+    prepaired_decks = (data_reader.get_All_Decks_Prepaired())
+
+    random_competitive_decks = getRandomDecks(prepaired_decks, first_format, False, sample_size)
+    random_casual_decks = getRandomDecks(prepaired_decks, second_format, False, sample_size)
+
+    views_competitive = getViews(random_competitive_decks)
+    views_casual = getViews(random_casual_decks)
+    
+    showBoxPlott(views_competitive, views_casual, first_format, second_format)
+
+    show_QQ_plot(views_competitive, f"QQ-Plot für {first_format.value}-Deck deck views")
+    show_QQ_plot(views_casual, f"QQ-Plot für {second_format.value}-Deck deck views")
+
+    testsHypothesis(views_competitive, views_casual)
+
+    total_prices, y, predicted_x = regression(views_competitive, views_casual)
+    showRegressionPlot(total_prices,y,predicted_x, first_format)
+
+    cm_tournaments = confusionMatrix(predicted_x, y)
+    showConfusionMatrix(cm_tournaments, first_format, second_format)
 
 def getAllDecksBasedOnFormat(list_of_decks: list[Deck], formatType: FormatType, isNotFormat: bool) -> list[Deck]:
 
@@ -23,10 +49,10 @@ def getAllDecksBasedOnFormat(list_of_decks: list[Deck], formatType: FormatType, 
                             if deck.format in formatType.value]
     return decks_based_on_Format
 
-def getRandomDecks(list_of_decks: list[Deck], formatType: FormatType, isNotFormat: bool) -> list[Deck]:
+def getRandomDecks(list_of_decks: list[Deck], formatType: FormatType, isNotFormat: bool, sample_size) -> list[Deck]:
 
     all_tournament_decks = getAllDecksBasedOnFormat(list_of_decks, formatType, isNotFormat)
-    randomDecks = random.sample(all_tournament_decks, SAMPLE_SIZE if SAMPLE_SIZE > 0 else len(list_of_decks))
+    randomDecks = random.sample(all_tournament_decks, sample_size if sample_size > 0 else len(list_of_decks))
 
     return randomDecks
 
@@ -38,15 +64,10 @@ def getViews(sample_decks: list[Deck]) -> list[int]:
     prices_tournament = [getCardViewsSum(deck.main_deck) for deck in sample_decks]
     return prices_tournament
 
-def regression(prepaired_decks: list[Deck], formatType: FormatType):
-    tournament_decks = getRandomDecks(prepaired_decks, formatType , False)
-    prices_tournament = getViews(tournament_decks)
-
-    non_tournament_decks = getRandomDecks(prepaired_decks, formatType, True)
-    prices_non_tournament = getViews(non_tournament_decks)
-    
-    prices = np.concatenate([prices_tournament, prices_non_tournament])
-    deck_type = np.array([1]*len(prices_tournament) + [0]*len(prices_non_tournament))
+def regression(views_competitive , views_casual):
+ 
+    prices = np.concatenate([views_competitive, views_casual])
+    deck_type = np.array([1]*len(views_competitive) + [0]*len(views_casual))
     
     X = sm.add_constant(prices)
     Y = deck_type
@@ -59,10 +80,10 @@ def regression(prepaired_decks: list[Deck], formatType: FormatType):
 
     return prices, Y, predicted_probs
 
-def showBoxPlott(group_a, group_b):
+def showBoxPlott(group_a, group_b, format_one: FormatType, format_two: FormatType):
     data = pd.DataFrame({
     'Preis': group_a + group_b,
-    'Kategorie': ['Tournament'] * len(group_a) + ['Nicht-Tournament'] * len(group_b)
+    'Kategorie': [f'{format_one}'] * len(group_a) + [f"{format_two}"] * len(group_b)
     })
 
     sns.boxplot(x='Kategorie', y='Preis', data=data)
@@ -74,15 +95,15 @@ def show_QQ_plot(group, title:str ):
     plt.title(title)
     plt.show() 
 
-def showRegressionPlot(prices, Y, predicted_probs):
+def showRegressionPlot(prices, Y, predicted_probs, format: FormatType):
     # Wahrscheinlichkeiten plotten
     plt.figure(figsize=(10, 6))
     plt.scatter(prices, Y, c=Y, cmap='coolwarm', label='Tatsächliche Werte', alpha=0.6)
     plt.scatter(prices, predicted_probs, color='black', label='Vorhergesagte Wahrscheinlichkeiten')
 
-    plt.title('Logistische Regression: Vorhersage des Deck-Typs basierend auf Preisen')
-    plt.xlabel('Preis')
-    plt.ylabel('Wahrscheinlichkeit für Anime-Deck')
+    plt.title('Logistische Regression: Vorhersage des Deck-Typs basierend auf Views')
+    plt.xlabel('Views')
+    plt.ylabel(f'Wahrscheinlichkeit für {format.value}')
     plt.legend()
     plt.grid(True)
 
@@ -95,8 +116,8 @@ def confusionMatrix(predicted_probs, Y):
 
     return cm
 
-def showConfusionMatrix(cm):
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Nicht-Tournament-Deck", "Tournament-Deck"])
+def showConfusionMatrix(cm, format_one: FormatType, format_two: FormatType):
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[f"{format_one.value}", f"{format_two.value}"])
     disp.plot(cmap=plt.cm.Blues)
     plt.title("Konfusionsmatrix für das logistische Regressionsmodell")
     plt.show()

@@ -4,6 +4,23 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+import data_reader
+import Regressionen.logisticRegressionViews as logisticRegressionViews
+import ENUMS.formatTypes as FormatType
+
+def startCluserAnalyse():
+    SAMPLE_SIZE: int = 250
+    ATTRIBUTE = "archetype"
+
+    prepaired_decks = (data_reader.get_All_Decks_Prepaired())
+    random_competitive_decks = logisticRegressionViews.getRandomDecks(prepaired_decks, FormatType.FormatType.META , False, SAMPLE_SIZE)
+    
+    attribute_list, deck_dicts = getAttributeList(random_competitive_decks, ATTRIBUTE)
+
+    matrix = prepairMatrix(attribute_list, deck_dicts, ATTRIBUTE)
+
+    clusters, deck_matrix_pca, cluster_archetypes = calculateDominantArchetype(matrix,deck_dicts, ATTRIBUTE)
+    plotCluster(clusters, deck_matrix_pca, cluster_archetypes)
 
 def getAttributeList(decks: list[Deck], attribtue: str):
     attribtue_List = []
