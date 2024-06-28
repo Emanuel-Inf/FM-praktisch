@@ -27,7 +27,6 @@ def get_All_Decks_Prepaired() -> list[Deck]:
     # Prepare the data
     flattened_decks = functools.reduce(lambda x, y: x + y, decks, [])
     flattened_decks = flattened_decks[1:] #Deck(deck_num='deck_num', name='deck_name', main_deck=['main_deck'])
-    print(type(flattened_decks))
 
     return flattened_decks
 

@@ -1,15 +1,15 @@
 from classes.deck import Deck
-import ygoAPI
+import API.cardAPIDatensatz1 as cardAPIDatensatz1
 from ENUMS.formatTypes import FormatType
 import random
-import ygoAPI
+import API.cardAPIDatensatz1 as cardAPIDatensatz1
 
 def deck_Price_Filter(decks: list[Deck]) -> list[Deck]:
     
     fitered_decks = []
 
     for deck in decks:
-        if (ygoAPI.deckHasCompletePriceInfo(deck)):
+        if (cardAPIDatensatz1.deckHasCompletePriceInfo(deck)):
             fitered_decks.append(deck)
 
     return fitered_decks
@@ -42,8 +42,8 @@ def deck_HasComplete_PriceInfo_Filter(decks: list[Deck]) -> list[Deck]:
     for deck in decks:
         isValid = False
         for card_id in deck.main_deck:
-            card = ygoAPI.getCardFromCache(card_id)
-            if ygoAPI.has_valid_price_info(card):
+            card = cardAPIDatensatz1.getCardFromCache(card_id)
+            if cardAPIDatensatz1.has_valid_price_info(card):
                 isValid = True
         if(isValid):
             complete_decks.append(deck)

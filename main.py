@@ -5,15 +5,15 @@ Date: 30.11.2022
 """
 
 import data_reader
-import Regressionen.logisticRegressionTournamentDeckPreise as logisticRegressionTournamentDeckPreise
-import Regressionen.logisticRegressionKarten as logisticRegressionKarten
+import Regressionen.logisticRegressionPreise as logisticRegressionPreise
+#import Regressionen.logisticRegressionViews as logisticRegressionViews
 from ENUMS.formatTypes import FormatType
 import numpy as np
 import statsmodels.api as sm
 
-
+from sklearn.cluster import KMeans
 from classes.deck import Deck
-import ygoAPI
+import API.cardAPIDatensatz1 as cardAPIDatensatz1
 
 import numpy as np
 import random
@@ -31,9 +31,13 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from sklearn.metrics import roc_curve, auc
 from sklearn.linear_model import LogisticRegression
+
+
 SEARCH_CARDS = [14558127]
 SEARCH_THIS_CARD = "44968687"
 SAMPLE_SIZE: int = 500
+from sklearn.decomposition import PCA
+import Clusteranalyse.clusteranalyse as  clusteranalyse
 
 def predict_probability(X, results):
     return results.predict(X)
@@ -43,102 +47,61 @@ def main():
 
     #Decks aus dem Datensatz lesen
     prepaired_decks = (data_reader.get_All_Decks_Prepaired())
-    data = {
-    'ArchetypeCount': [3, 1, 5, 2, 4, 2, 6, 3, 1, 5],  # Beispielwerte für die Anzahl der Archetyp-Karten in den Decks
-    'DeckType': [1, 1, 0, 0, 1, 0, 1, 0, 0, 0]  # 1 für competitive, 0 für casual
-    }
 
-    df = pd.DataFrame(data)
-
-    # Unabhängige Variable (Anzahl der Archetyp Karten) und abhängige Variable (Decktyp)
-    X = df['ArchetypeCount']
-    Y = df['DeckType']
-
-    # Hinzufügen einer Konstanten für die logistische Regression
-    X = sm.add_constant(X)
-
-    # Logistisches Regressionsmodell erstellen und anpassen
-    model = sm.Logit(Y, X)
-    results = model.fit()
-
-    # Ergebnisse der logistischen Regression anzeigen
-    print(results.summary())
-
-    # Wahrscheinlichkeiten plotten
-    plt.figure(figsize=(10, 6))
-    plt.scatter(df['ArchetypeCount'], df['DeckType'], c=df['DeckType'], cmap='coolwarm', label='Tatsächliche Werte', alpha=0.6)
-    plt.plot(df['ArchetypeCount'], results.predict(X), color='black', label='Vorhergesagte Wahrscheinlichkeiten')
-    plt.title('Logistische Regression: Vorhersage des Deck-Typs basierend auf Archetyp-Karten')
-    plt.xlabel('Anzahl der Archetyp-Karten im Deck')
-    plt.ylabel('Wahrscheinlichkeit für wettbewerbsfähiges Deck')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    
     
     """""
-    random_competitive_decks = logisticRegressionKarten.getRandomDecks(prepaired_decks, FormatType.COMPETITIVE, False, SAMPLE_SIZE)
+    #Custeranalyse
+    random_competitive_decks = logisticRegressionKarten.getRandomDecks(prepaired_decks, FormatType.META, False, SAMPLE_SIZE)
+    ATTRIBUTE = "archetype"
+    attribute_list, deck_dicts = clusteranalyse.getAttributeList(random_competitive_decks, ATTRIBUTE)
+
+    matrix = clusteranalyse.prepairMatrix(attribute_list, deck_dicts, ATTRIBUTE)
+
+    clusters, deck_matrix_pca, cluster_archetypes = clusteranalyse.calculateDominantArchetype(matrix,deck_dicts, ATTRIBUTE)
+
+    clusteranalyse.plotCluster(clusters, deck_matrix_pca, cluster_archetypes)
+    """""
+
+    """""
+    random_competitive_decks = logisticRegressionViews.getRandomDecks(prepaired_decks, FormatType.COMPETITIVE, False, )
+    random_casual_decks = logisticRegressionViews.getRandomDecks(prepaired_decks, FormatType.CASUAL, False)
+
+    views_competitive = logisticRegressionViews.getViews(random_competitive_decks)
+    random_casual = logisticRegressionViews.getViews(random_casual_decks)
+
+    logisticRegressionViews.showBoxPlott(views_competitive, random_casual)
+
+    logisticRegressionViews.show_QQ_plot(views_competitive, "QQ-Plot für Tournament-Deck deck views")
+    logisticRegressionViews.show_QQ_plot(random_casual, "QQ-Plot Casual Deck views")
+
+    logisticRegressionViews.testsHypothesis(views_competitive, random_casual)
+
+    total_prices, y, predicted_x = logisticRegressionViews.regression(prepaired_decks, FormatType.COMPETITIVE)
+    logisticRegressionViews.showRegressionPlot(total_prices,y,predicted_x)
+
+    cm_tournaments = logisticRegressionViews.confusionMatrix(predicted_x, y)
+    logisticRegressionViews.showConfusionMatrix(cm_tournaments)
     
-    random_casual_decks = logisticRegressionKarten.getRandomDecks(prepaired_decks, FormatType.CASUAL, False, SAMPLE_SIZE)
-    
-    random_competitive_decks_card_hits = logisticRegressionKarten.getListOfHitsOnSpecificCard(random_competitive_decks, SEARCH_THIS_CARD)
-    
-    random_casual_decks_card_hits = logisticRegressionKarten.getListOfHitsOnSpecificCard(random_casual_decks, SEARCH_THIS_CARD)
-
-    hits = np.concatenate([random_competitive_decks_card_hits, random_casual_decks_card_hits])
-    deck_type = np.array([1]*len(random_competitive_decks_card_hits) + [0]*len(random_casual_decks_card_hits))
-
-    X = sm.add_constant(hits)
-    Y = deck_type
-
-    model = sm.Logit(Y, X)
-    results = model.fit()
-
-    predicted_probs = results.predict(X)
-    results.summary()
-
-    # Wahrscheinlichkeiten plotten
-    plt.figure(figsize=(10, 6))
-    plt.scatter(hits, Y, c=Y, cmap='coolwarm', label='Tatsächliche Werte', alpha=0.6)
-    plt.scatter(hits, predicted_probs, color='black', label='Vorhergesagte Wahrscheinlichkeiten')
-
-    plt.title('Logistische Regression: Vorhersage des Deck-Typs basierend auf Preisen')
-    plt.xlabel('Preis')
-    plt.ylabel('Wahrscheinlichkeit für Anime-Deck')
-    plt.legend()
-    plt.grid(True)
-
-    plt.show()
-
-    threshold = 0.5
-    y_pred = (predicted_probs >= threshold).astype(int)
-    cm = confusion_matrix(Y, y_pred)
-
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Nicht-Tournament-Deck", "Tournament-Deck"])
-    disp.plot(cmap=plt.cm.Blues)
-    plt.title("Konfusionsmatrix für das logistische Regressionsmodell")
-    plt.show()
-    
-
-#Tournament Decks correlate to a higer price
-    prices_tournament = logisticRegressionTournamentDeckPreise.getPrices(logisticRegressionTournamentDeckPreise.getRandomDecks(prepaired_decks, FormatType.COMPETITIVE, False))
-    prices_non_tournament = logisticRegressionTournamentDeckPreise.getPrices(logisticRegressionTournamentDeckPreise.getRandomDecks(prepaired_decks, FormatType.COMPETITIVE, True))
-    
-    logisticRegressionTournamentDeckPreise.showBoxPlott(prices_tournament, prices_non_tournament)
-
-    logisticRegressionTournamentDeckPreise.show_QQ_plot(prices_tournament, "QQ-Plot für Tournament-Deck Preise")
-    logisticRegressionTournamentDeckPreise.show_QQ_plot(prices_non_tournament, "QQ-Plot für Nicht-Tournament-Deck Preise")
-
-    logisticRegressionTournamentDeckPreise.testsHypothesis(prices_tournament, prices_non_tournament)
-
-    total_prices, y, predicted_x = logisticRegressionTournamentDeckPreise.regression(prepaired_decks, FormatType.COMPETITIVE)
-    logisticRegressionTournamentDeckPreise.showRegressionPlot(total_prices,y,predicted_x)
-
-    cm_tournaments = logisticRegressionTournamentDeckPreise.confusionMatrix(predicted_x, y)
-    logisticRegressionTournamentDeckPreise.showConfusionMatrix(cm_tournaments)
 """""
+#Tournament Decks correlate to a higer price
+    prices_tournament = logisticRegressionPreise.getPrices(logisticRegressionPreise.getRandomDecks(prepaired_decks, FormatType.COMPETITIVE, False))
+    prices_non_tournament = logisticRegressionPreise.getPrices(logisticRegressionPreise.getRandomDecks(prepaired_decks, FormatType.COMPETITIVE, True))
+    
+    logisticRegressionPreise.showBoxPlott(prices_tournament, prices_non_tournament)
+
+    logisticRegressionPreise.show_QQ_plot(prices_tournament, "QQ-Plot für Tournament-Deck Preise")
+    logisticRegressionPreise.show_QQ_plot(prices_non_tournament, "QQ-Plot für Nicht-Tournament-Deck Preise")
+
+    logisticRegressionPreise.testsHypothesis(prices_tournament, prices_non_tournament)
+
+    total_prices, y, predicted_x = logisticRegressionPreise.regression(prepaired_decks, FormatType.COMPETITIVE)
+    logisticRegressionPreise.showRegressionPlot(total_prices,y,predicted_x)
+
+    cm_tournaments = logisticRegressionPreise.confusionMatrix(predicted_x, y)
+    logisticRegressionPreise.showConfusionMatrix(cm_tournaments)
+
 
 
 if __name__ == "__main__":
     main()
-
-
