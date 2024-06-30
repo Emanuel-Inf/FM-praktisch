@@ -10,10 +10,11 @@ import random
 
 import numpy as np
 
+import archetypes
 import data_reader
 from classes.deck import Deck
 
-SAMPLE_SIZE: int = 250
+SAMPLE_SIZE: int = 10000
 
 
 def _archetype_is_present(
@@ -91,71 +92,49 @@ def calculate_confidence_intervall(
 
 def main():
     """Count appearence of archetypes and calculate confidence intervall."""
-    # === define card sets ===
-    snake_eyes: set[str] = {
-        "09674034",
-        "12058741",
-        "45663742",
-        "27260347",
-        "48452496",
-        "90241276",
-        "89023486",
-        "24081957",
-        "53639887",
-        "26700718",
-        "74906081",
-    }
-    horus: set[str] = {
-        "66214679",
-        "11335209",
-        "47330808",
-        "99307040",
-        "75830094",
-        "11224103",
-        "48229808",
-        "09264485",
-        "84941194",
-        "74725513",
-        "26984177",
-        "16528181",
-        "01490690",
-    }
-    kashtira: set[str] = {
-        "32909498",
-        "94392192",
-        "31149212",
-        "68304193",
-        "78534861",
-        "04928565",
-        "34447918",
-        "69540484",
-        "82286798",
-        "08953369",
-        "33925864",
-        "21639276",
-        "71832012",
-    }
 
     # === Get Data ===
     decks = data_reader.get_All_Decks_Prepaired()
-    random_sample = random.sample(decks, SAMPLE_SIZE if SAMPLE_SIZE > 0 else len(decks))
+    sample_size = SAMPLE_SIZE if 0 < SAMPLE_SIZE <= len(decks) else len(decks)
+    print(f"Using {(sample_size / len(decks)) * 100 :.2f} % of the decks as sample")
+    random_sample = random.sample(decks, sample_size)
 
-    # Calculate confidence intervalls
-    # Round all results to 4 decimal points
-    print("Snake Eyes:")
-    snake_eye_intervall = calculate_confidence_intervall(snake_eyes, random_sample)
+    print("\n=== Snake Eyes ===")
+    snake_eye_intervall = calculate_confidence_intervall(
+        archetypes.snake_eyes, random_sample
+    )
     if snake_eye_intervall:
         print(f"I = [{snake_eye_intervall[0]:.4f}; {snake_eye_intervall[1]:.4f})")
 
-    print("Kashtira:")
-    kashtira_intervall = calculate_confidence_intervall(kashtira, random_sample)
-    if kashtira_intervall:
-        print(f"I = [{kashtira_intervall[0]:.4f}; {kashtira_intervall[1]:.4f})")
+    print("\n=== of Greed ===")
+    of_greed_intervall = calculate_confidence_intervall(
+        archetypes.of_greed, random_sample
+    )
+    if of_greed_intervall:
+        print(f"I = [{of_greed_intervall[0]:.4f}; {of_greed_intervall[1]:.4f})")
 
-    print("Horus:")
-    horus_intervall = calculate_confidence_intervall(horus, random_sample)
-    if horus_intervall:
-        print(f"I = [{horus_intervall[0]:.4f}; {horus_intervall[1]:.4f})")
+    print("\n=== Salamandgreat ===")
+    salamand_great_interval = calculate_confidence_intervall(
+        archetypes.salamandgreat, random_sample
+    )
+    if salamand_great_interval:
+        print(
+            f"I = [{salamand_great_interval[0]:.4f}; {salamand_great_interval[1]:.4f})"
+        )
+
+    print("\n=== Branded ===")
+    branded_intervall = calculate_confidence_intervall(
+        archetypes.branded, random_sample
+    )
+    if branded_intervall:
+        print(f"I = [{branded_intervall[0]:.4f}; {branded_intervall[1]:.4f})")
+
+    print("\n=== Rescue-ACE ===")
+    rescue_intervall = calculate_confidence_intervall(
+        archetypes.rescue_ace, random_sample
+    )
+    if rescue_intervall:
+        print(f"I = [{rescue_intervall[0]:.4f}; {rescue_intervall[1]:.4f})")
 
 
 if __name__ == "__main__":
