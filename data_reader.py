@@ -5,13 +5,14 @@ Date: 30.11.2022
 """
 
 import csv
-from typing import Any
-import ast
-from classes.deck import Deck
-import json
 import functools
 import os
+from typing import Any
+
+from classes.deck import Deck
+
 CSV_DIRECTORY: str = "./daten/csv/"
+
 
 def get_All_Decks_Prepaired() -> list[Deck]:
 
@@ -26,9 +27,10 @@ def get_All_Decks_Prepaired() -> list[Deck]:
 
     # Prepare the data
     flattened_decks = functools.reduce(lambda x, y: x + y, decks, [])
-    flattened_decks = flattened_decks[1:] #Deck(deck_num='deck_num', name='deck_name', main_deck=['main_deck'])
+    flattened_decks = flattened_decks[1:]
 
     return flattened_decks
+
 
 def read_csv(file_name: str) -> list[tuple[str, ...]]:
     """Read all values from file_name."""
@@ -71,8 +73,8 @@ def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
     main_deck_string = data_vector[6]
     deck_format = data_vector[5]
 
-    deck_str = main_deck_string.strip('[]')
-    deck_liste = deck_str.split(',')  
+    deck_str = main_deck_string.strip("[]")
+    deck_liste = deck_str.split(",")
     deck_liste = [id.strip('"') for id in deck_liste]
 
     data_dict: dict[str, Any] = {
@@ -80,7 +82,7 @@ def parse_datalist_to_dict(data_vector: list[Any]) -> dict[str, Any]:
         "name": name,
         "format": format,
         "main_deck": deck_liste,
-        "format": deck_format
+        "format": deck_format,
     }
 
     return data_dict
@@ -99,9 +101,10 @@ def construct_deck_object_from_dict(deck_as_dict: dict[str, Any]) -> Deck:
         deck_num=deck_as_dict["deck_num"],
         name=deck_as_dict["name"],
         format=deck_as_dict["format"],
-        main_deck=deck_as_dict["main_deck"]
+        main_deck=deck_as_dict["main_deck"],
     )
 
+
 def filterDecks(deck: list[Any], format: list[str]) -> int:
-     
+
     return deck[5] in format

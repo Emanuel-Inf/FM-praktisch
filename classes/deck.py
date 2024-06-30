@@ -14,4 +14,3 @@ class Deck:
         """Search for a card in the deck."""
         counted_cards = self.main_deck.count(card_id)
         return counted_cards
-
