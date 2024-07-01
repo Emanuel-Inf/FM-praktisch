@@ -31,7 +31,7 @@ def main():
 
     clusteranalyse.startCluserAnalyse()
     logisticRegressionViews.startLogRegressionForViews()
-
+"""""
     #----------------------------------------------------------------------#
     # Read all data from the data directory
     files = os.listdir(CSV_DIRECTORY)
@@ -174,7 +174,7 @@ def main():
 
     cm_tournaments = logisticRegression.confusionMatrix(predicted_x, y)
     logisticRegression.showConfusionMatrix(cm_tournaments)
-
+"""""
     
 
 if __name__ == "__main__":

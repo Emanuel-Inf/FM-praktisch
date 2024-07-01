@@ -9,11 +9,11 @@ import Regressionen.logisticRegressionViews as logisticRegressionViews
 import ENUMS.formatTypes as FormatType
 
 def startCluserAnalyse():
-    SAMPLE_SIZE: int = 250
+    SAMPLE_SIZE: int = 10000
     ATTRIBUTE = "archetype"
 
     prepaired_decks = (data_reader.get_All_Decks_Prepaired())
-    random_competitive_decks = logisticRegressionViews.getRandomDecks(prepaired_decks, FormatType.FormatType.META , False, SAMPLE_SIZE)
+    random_competitive_decks = logisticRegressionViews.getRandomDecks(prepaired_decks, FormatType.FormatType.CASUAL , False, SAMPLE_SIZE)
     
     attribute_list, deck_dicts = getAttributeList(random_competitive_decks, ATTRIBUTE)
 
@@ -65,7 +65,7 @@ def calculateDominantArchetype(deck_matrix, deck_dicts: list[Deck], attribute: s
     deck_matrix_pca = pca.fit_transform(deck_matrix)
 
     # Anwendung des K-Means-Algorithmus auf den PCA-transformierten Daten
-    kmeans = KMeans(n_clusters=3, random_state=0)
+    kmeans = KMeans(n_clusters=4, random_state=0)
     clusters = kmeans.fit_predict(deck_matrix_pca)
 
     # Dominante Archetypen für jedes Cluster berechnen

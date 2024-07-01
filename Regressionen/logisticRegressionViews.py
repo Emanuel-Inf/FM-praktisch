@@ -13,22 +13,27 @@ from ENUMS.formatTypes import FormatType
 import data_reader
 
 def startLogRegressionForViews():
-    sample_size = 250
+    sample_size = 1000
     first_format = FormatType.ANIME
-    second_format = FormatType.CASUAL
+    second_format = FormatType.ANIME
+    isKomplämentär = True
 
     prepaired_decks = (data_reader.get_All_Decks_Prepaired())
 
     random_competitive_decks = getRandomDecks(prepaired_decks, first_format, False, sample_size)
-    random_casual_decks = getRandomDecks(prepaired_decks, second_format, False, sample_size)
-
+    random_casual_decks = getRandomDecks(prepaired_decks, second_format, isKomplämentär, sample_size)
+    
     views_competitive = getViews(random_competitive_decks)
     views_casual = getViews(random_casual_decks)
-    
-    showBoxPlott(views_competitive, views_casual, first_format, second_format)
 
-    show_QQ_plot(views_competitive, f"QQ-Plot für {first_format.value}-Deck deck views")
-    show_QQ_plot(views_casual, f"QQ-Plot für {second_format.value}-Deck deck views")
+    showBoxPlott(views_competitive, views_casual, first_format, second_format, isKomplämentär)
+
+    show_QQ_plot(views_competitive, f"QQ-Plot für {first_format}-Deck deck views")
+
+    if(isKomplämentär):
+        show_QQ_plot(views_casual, f"QQ-Plot für nicht {second_format}-Deck deck views")
+    else:
+        show_QQ_plot(views_casual, f"QQ-Plot für {second_format}-Deck deck views")
 
     testsHypothesis(views_competitive, views_casual)
 
@@ -36,7 +41,7 @@ def startLogRegressionForViews():
     showRegressionPlot(total_prices,y,predicted_x, first_format)
 
     cm_tournaments = confusionMatrix(predicted_x, y)
-    showConfusionMatrix(cm_tournaments, first_format, second_format)
+    showConfusionMatrix(cm_tournaments, first_format, second_format, isKomplämentär)
 
 def getAllDecksBasedOnFormat(list_of_decks: list[Deck], formatType: FormatType, isNotFormat: bool) -> list[Deck]:
 
@@ -80,14 +85,27 @@ def regression(views_competitive , views_casual):
 
     return prices, Y, predicted_probs
 
-def showBoxPlott(group_a, group_b, format_one: FormatType, format_two: FormatType):
+def showBoxPlott(group_a, group_b, format_one: FormatType, format_two: FormatType, isKomplämentär):
+
+    kategorie_string = ""
+    if(isKomplämentär):
+        kategorie_string = [f'{format_one}'] * len(group_a) + [f"nicht {format_two}"] * len(group_b)
+    else:
+        kategorie_string =  [f'{format_one}'] * len(group_a) + [f"{format_two}"] * len(group_b)
     data = pd.DataFrame({
-    'Preis': group_a + group_b,
-    'Kategorie': [f'{format_one}'] * len(group_a) + [f"{format_two}"] * len(group_b)
+    'Views': group_a + group_b,
+    'Kategorie': kategorie_string
     })
 
-    sns.boxplot(x='Kategorie', y='Preis', data=data)
-    plt.title('Vergleich der Varianz zwischen Tournament und Nicht-Tournament Decks')
+    überschrift_string = ""
+    if isKomplämentär:
+        überschrift_string = f"Vergleich der Varianz zwischen '{format_one}' und nicht '{format_two}' Decks"
+    else:
+        überschrift_string = f"Vergleich der Varianz zwischen '{format_one}' und '{format_two}' Decks"
+
+
+    sns.boxplot(x='Kategorie', y='Views', data=data)
+    plt.title(überschrift_string)
     plt.show()
 
 def show_QQ_plot(group, title:str ):
@@ -103,7 +121,7 @@ def showRegressionPlot(prices, Y, predicted_probs, format: FormatType):
 
     plt.title('Logistische Regression: Vorhersage des Deck-Typs basierend auf Views')
     plt.xlabel('Views')
-    plt.ylabel(f'Wahrscheinlichkeit für {format.value}')
+    plt.ylabel(f'Wahrscheinlichkeit für {format}')
     plt.legend()
     plt.grid(True)
 
@@ -116,8 +134,12 @@ def confusionMatrix(predicted_probs, Y):
 
     return cm
 
-def showConfusionMatrix(cm, format_one: FormatType, format_two: FormatType):
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[f"{format_one.value}", f"{format_two.value}"])
+def showConfusionMatrix(cm, format_one: FormatType, format_two: FormatType, isKomplämentär):
+    disp = None
+    if(isKomplämentär):
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[f"{format_one}", f"nicht {format_two}"])
+    else:
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[f"{format_one}", f"{format_two}"])
     disp.plot(cmap=plt.cm.Blues)
     plt.title("Konfusionsmatrix für das logistische Regressionsmodell")
     plt.show()
