@@ -4,7 +4,6 @@
 """
 
 import random
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -12,9 +11,21 @@ import seaborn as sns
 import statsmodels.api as sm
 from scipy.stats import levene, mannwhitneyu, probplot, shapiro
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
-
 import ygoAPI
 from classes.deck import Deck
+
+import random
+import ygoAPI
+import logisticRegression
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import shapiro, levene, probplot, mannwhitneyu
+import statsmodels.api as sm
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import pandas as pd
+import seaborn as sns
+
 
 tournament_type = [
     "World Championship Decks",
@@ -22,8 +33,21 @@ tournament_type = [
     "Tournament Meta Decks OCG",
     "Meta Decks",
 ]
-SAMPLE_SIZE: int = 250
 
+
+def startRegression(filtered_decks, SAMPLE_SIZE):
+    #Tournament Decks correlate to a higer price
+    prices_tournament = logisticRegression.getPrices(logisticRegression.getRandomTournamentDecks(filtered_decks))
+    prices_non_tournament = logisticRegression.getPrices(logisticRegression.getRandomNonTournamentDecks(filtered_decks))
+    
+    logisticRegression.showBoxPlott(prices_tournament, prices_non_tournament)
+    logisticRegression.show_QQ_plot(prices_tournament, "QQ-Plot für Tournament-Deck Preise")
+    logisticRegression.show_QQ_plot(prices_non_tournament, "QQ-Plot für Nicht-Tournament-Deck Preise")
+    logisticRegression.testsHypothesis(prices_tournament, prices_non_tournament)
+    total_prices, y, predicted_x = logisticRegression.regression(filtered_decks)
+    logisticRegression.showRegressionPlot(total_prices,y,predicted_x)
+    cm_tournaments = logisticRegression.confusionMatrix(predicted_x, y)
+    logisticRegression.showConfusionMatrix(cm_tournaments)
 
 def getAllTournamentDecks(list_of_decks: list[Deck]) -> list[Deck]:
     tournament_decks = [

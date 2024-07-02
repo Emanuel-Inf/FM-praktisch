@@ -10,7 +10,7 @@ from classes.card import Card
 from ENUMS.cardtype import CardType
 
 cards_cache = {}
-NEW_PATH_JSON = "./daten/csv/cards.csv"
+NEW_PATH_JSON = "./daten/cards/cardsWithExtraInfo.csv"
 
 
 def getCardFromCache(cardID: str) -> Card:
