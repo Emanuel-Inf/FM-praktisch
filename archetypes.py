@@ -1,4 +1,7 @@
-"""Set-Definition of archetypes."""
+"""Set-Definition of archetypes.
+
+@authors: Katrin Kober, Emanuel Petrinovic, Max Weise
+"""
 
 # === define card sets ===
 snake_eyes: set[str] = {

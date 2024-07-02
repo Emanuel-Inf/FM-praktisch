@@ -1,9 +1,21 @@
+"""Define Decks as collections of cards.
+
+@authors: Katrin Kober, Emanuel Petrinovic, Max Weise
+"""
+
 import dataclasses
 
 
 @dataclasses.dataclass
 class Deck:
-    """Definiton of a Pokemon. This class is immutabel and sortable."""
+    """Define a deck object. Decks are collections of cards.
+
+    Attributes:
+        deck_num (str): The ID of the deck.
+        name (str): The name of the deck.
+        main_deck (list[str]): All cards of the main deck.
+        format (str): The format of the deck.
+    """
 
     deck_num: str
     name: str

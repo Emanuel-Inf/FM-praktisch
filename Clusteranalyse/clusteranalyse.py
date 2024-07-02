@@ -1,26 +1,38 @@
-from classes.deck import Deck
-import API.cardAPIDatensatz1 as cardAPIDatensatz1
-import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
+"""Run a cluster-analysis based on retrieved data
+
+@authors: Katrin Kober, Emanuel Petrinovic, Max Weise
+"""
+
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+
+import API.cardAPIDatensatz1 as cardAPIDatensatz1
 import data_reader
-import Regressionen.logisticRegressionViews as logisticRegressionViews
 import ENUMS.formatTypes as FormatType
+import Regressionen.logisticRegressionViews as logisticRegressionViews
+from classes.deck import Deck
+
 
 def startCluserAnalyse():
     SAMPLE_SIZE: int = 10000
     ATTRIBUTE = "archetype"
 
-    prepaired_decks = (data_reader.get_All_Decks_Prepaired())
-    random_competitive_decks = logisticRegressionViews.getRandomDecks(prepaired_decks, FormatType.FormatType.CASUAL , False, SAMPLE_SIZE)
-    
+    prepaired_decks = data_reader.get_All_Decks_Prepaired()
+    random_competitive_decks = logisticRegressionViews.getRandomDecks(
+        prepaired_decks, FormatType.FormatType.CASUAL, False, SAMPLE_SIZE
+    )
+
     attribute_list, deck_dicts = getAttributeList(random_competitive_decks, ATTRIBUTE)
 
     matrix = prepairMatrix(attribute_list, deck_dicts, ATTRIBUTE)
 
-    clusters, deck_matrix_pca, cluster_archetypes = calculateDominantArchetype(matrix,deck_dicts, ATTRIBUTE)
+    clusters, deck_matrix_pca, cluster_archetypes = calculateDominantArchetype(
+        matrix, deck_dicts, ATTRIBUTE
+    )
     plotCluster(clusters, deck_matrix_pca, cluster_archetypes)
+
 
 def getAttributeList(decks: list[Deck], attribtue: str):
     attribtue_List = []
@@ -32,22 +44,22 @@ def getAttributeList(decks: list[Deck], attribtue: str):
 
         for card in deck.main_deck:
             card = cardAPIDatensatz1.getCardFromCache(card)
-            if(card.get_attribute(attribtue) is not None):
+            if card.get_attribute(attribtue) is not None:
                 deck_info[attribtue].append(card.get_attribute(attribtue))
-            if(card.get_attribute(attribtue) not in attribtue_List):
+            if card.get_attribute(attribtue) not in attribtue_List:
                 attribtue_List.append(card.get_attribute(attribtue))
 
         deck_dicts.append(deck_info)
 
-    
     return attribtue_List, deck_dicts
+
 
 def prepairMatrix(attribute_list, deck_dicts, attribute: str):
 
     num_decks = len(deck_dicts)
     num_archetypes = len(attribute_list)
     deck_matrix = np.zeros((num_decks, num_archetypes), dtype=int)
-    
+
     # Fülle die Matrix basierend auf den Archetypen in jedem Deck
     for i, deck_info in enumerate(deck_dicts):
         attributes_in_deck = deck_info[attribute]
@@ -58,7 +70,8 @@ def prepairMatrix(attribute_list, deck_dicts, attribute: str):
 
     return deck_matrix
 
-def calculateDominantArchetype(deck_matrix, deck_dicts: list[Deck], attribute: str): 
+
+def calculateDominantArchetype(deck_matrix, deck_dicts: list[Deck], attribute: str):
 
     # Anwendung von PCA zur Reduzierung der Dimensionalität auf 2 Dimensionen
     pca = PCA(n_components=2)
@@ -76,23 +89,32 @@ def calculateDominantArchetype(deck_matrix, deck_dicts: list[Deck], attribute: s
             if clusters[i] == cluster_label:
                 cluster_archetypes[cluster_label].extend(deck_info[attribute])
         # Finde den dominanten Archetyp für das Cluster
-        dominant_archetype = max(set(cluster_archetypes[cluster_label]), key=cluster_archetypes[cluster_label].count)
-        cluster_name = f"Cluster {cluster_label + 1}: Dominant Archetype '{dominant_archetype}'"
+        dominant_archetype = max(
+            set(cluster_archetypes[cluster_label]),
+            key=cluster_archetypes[cluster_label].count,
+        )
+        cluster_name = (
+            f"Cluster {cluster_label + 1}: Dominant Archetype '{dominant_archetype}'"
+        )
         cluster_archetypes[cluster_label] = cluster_name
-    
+
     return clusters, deck_matrix_pca, cluster_archetypes
 
-def plotCluster(clusters, deck_matrix_pca, cluster_archetypes ): 
+
+def plotCluster(clusters, deck_matrix_pca, cluster_archetypes):
 
     plt.figure(figsize=(10, 8))
     for cluster_label in np.unique(clusters):
-        plt.scatter(deck_matrix_pca[clusters == cluster_label, 0], 
-                    deck_matrix_pca[clusters == cluster_label, 1],
-                    label=cluster_archetypes[cluster_label])
+        plt.scatter(
+            deck_matrix_pca[clusters == cluster_label, 0],
+            deck_matrix_pca[clusters == cluster_label, 1],
+            label=cluster_archetypes[cluster_label],
+        )
 
-    plt.title('Clusteranalyse der Decks basierend auf Archetypen')
-    plt.xlabel('PCA Dimension 1')
-    plt.ylabel('PCA Dimension 2')
+    plt.title("Clusteranalyse der Decks basierend auf Archetypen")
+    plt.xlabel("PCA Dimension 1")
+    plt.ylabel("PCA Dimension 2")
     plt.legend()
     plt.grid(True)
     plt.show()
+

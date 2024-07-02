@@ -1,7 +1,6 @@
 """This file contains functions to read and compile data.
 
-@author: Lisa Tochtermann, Emanuel Petrinovic, Max Weise
-Date: 30.11.2022
+@author: Katrin Kober, Emanuel Petrinovic, Max Weise
 """
 
 import csv
