@@ -60,7 +60,7 @@ def _count_decks_with_archetype(decks: list[Deck], archetype_cards: set[str]) ->
 
 
 def calculate_confidence_intervall(
-    archetype_cards: set[str],
+    archetype_cards: archetypes.Archetypes,
     random_sample: list[Deck],
     z_score: float = 1.96,
 ) -> tuple[float, float] | None:
@@ -78,7 +78,7 @@ def calculate_confidence_intervall(
     """
     sample_size = len(random_sample)
 
-    counter = _count_decks_with_archetype(random_sample, archetype_cards)
+    counter = _count_decks_with_archetype(random_sample, archetype_cards.value)
     if counter == 0:
         print("Archetype not present.")
         return
@@ -90,32 +90,30 @@ def calculate_confidence_intervall(
     return (lower_bound if lower_bound > 0 else 0, upper_bound)
 
 
-def main():
+def calc_confidence_intervall(decks: list[Deck], sample_size):
     """Count appearence of archetypes and calculate confidence intervall."""
 
     # === Get Data ===
-    decks = data_reader.get_All_Decks_Prepaired()
-    sample_size = SAMPLE_SIZE if 0 < SAMPLE_SIZE <= len(decks) else len(decks)
     print(f"Using {(sample_size / len(decks)) * 100 :.2f} % of the decks as sample")
     random_sample = random.sample(decks, sample_size)
 
     print("\n=== Snake Eyes ===")
     snake_eye_intervall = calculate_confidence_intervall(
-        archetypes.snake_eyes, random_sample
+        archetypes.Archetypes.SNAKE_EYES, random_sample
     )
     if snake_eye_intervall:
         print(f"I = [{snake_eye_intervall[0]:.4f}; {snake_eye_intervall[1]:.4f})")
 
     print("\n=== of Greed ===")
     of_greed_intervall = calculate_confidence_intervall(
-        archetypes.of_greed, random_sample
+        archetypes.Archetypes.OF_GREED, random_sample
     )
     if of_greed_intervall:
         print(f"I = [{of_greed_intervall[0]:.4f}; {of_greed_intervall[1]:.4f})")
 
     print("\n=== Salamandgreat ===")
     salamand_great_interval = calculate_confidence_intervall(
-        archetypes.salamandgreat, random_sample
+        archetypes.Archetypes.SALAMANDGREAT, random_sample
     )
     if salamand_great_interval:
         print(
@@ -124,18 +122,20 @@ def main():
 
     print("\n=== Branded ===")
     branded_intervall = calculate_confidence_intervall(
-        archetypes.branded, random_sample
+        archetypes.Archetypes.BRANDED, random_sample
     )
     if branded_intervall:
         print(f"I = [{branded_intervall[0]:.4f}; {branded_intervall[1]:.4f})")
 
     print("\n=== Rescue-ACE ===")
     rescue_intervall = calculate_confidence_intervall(
-        archetypes.rescue_ace, random_sample
+        archetypes.Archetypes.RESCUE_ACE, random_sample
     )
     if rescue_intervall:
         print(f"I = [{rescue_intervall[0]:.4f}; {rescue_intervall[1]:.4f})")
 
 
 if __name__ == "__main__":
-    main()
+    decks = data_reader.get_All_Decks_Prepaired()
+    sample_size = SAMPLE_SIZE if 0 < SAMPLE_SIZE <= len(decks) else len(decks)
+    calc_confidence_intervall(decks, sample_size)
